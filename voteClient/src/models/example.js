@@ -26,6 +26,7 @@ export default {
       yield put({ type: 'save', payload: { ...payload } });
     },
     *fetchBackend({ payload }, { call, put }) {
+      console.log(payload)
       const response = yield call(getVoteContent, payload);
       yield put({
         type: 'voteBackendContent',
@@ -73,6 +74,7 @@ export default {
     },
 
     voteBackendContent(state, { payload }) {
+      console.log(payload)
       return {
         ...state,
         voteBackendContent: payload

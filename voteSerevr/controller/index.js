@@ -113,7 +113,28 @@ module.exports = {
     },
 
     getPushContent: async (ctx, next) => {
-        let content = await contentModel.find({}).sort({ 'createdAt': -1 });
+        let { type } = ctx.params;
+        type || (type = 3);
+
+        let content;
+
+        switch (Number(type)) {
+            case 1:
+                content = await contentModel.find({}).sort({ like: -1 });
+                break;
+            case 2:
+                content = await contentModel.find({}).sort({ like: 1 });
+                break;
+            case 3:
+                content = await contentModel.find({}).sort({ createdAt: -1 });
+                break;
+            case 4:
+                content = await contentModel.find({}).sort({ createdAt: 1 });
+                break;
+
+            default:
+                break;
+        };
 
         ctx.body = {
             content

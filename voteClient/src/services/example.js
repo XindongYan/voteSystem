@@ -25,10 +25,11 @@ export function postVoteContent(value, token) {
   })
 }
 
-export function getVoteContent(token) {
+export function getVoteContent(value) {
   return request('/api/getContetn', {
     method: 'POST',
-    headers: { Authorization: 'Bearer ' + token }
+    body: value,
+    headers: {}
   })
 }
 

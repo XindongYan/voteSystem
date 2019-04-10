@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'dva';
 // import styles from './IndexPage.css';
-import { Layout, Menu, List, Avatar, Icon, Button, message } from 'antd';
+import { Layout, Menu, List, Avatar, Icon, Button, message, Dropdown, Breadcrumb } from 'antd';
 import { routerRedux } from 'dva/router';
 import Modal from '../components/modal';
 import { remove } from '../services/example';
@@ -86,9 +86,26 @@ export default class backend extends React.PureComponent {
 		this.showModal(e, 'edit');
 	}
 
+	handleMenuClick = (e) => {
+		console.log('click', e);
+		this.props.dispatch({
+			type: 'example/fetchBackend',
+			payload: {type: e.key}
+		});
+	}
+
 	render() {
 
 		const { currentUser } = this.state;
+
+		const menu = (
+			<Menu onClick={this.handleMenuClick}>
+				<Menu.Item key="1">由赞数从高到底排列</Menu.Item>
+				<Menu.Item key="2">由赞数从低到高排列</Menu.Item>
+				<Menu.Item key="3">由最近时间排列</Menu.Item>
+				<Menu.Item key="4">由最远时间排列</Menu.Item>
+			</Menu>
+		);
 
 		const listData = [];
 		for (let i = 0; i < 23; i++) {
@@ -126,6 +143,13 @@ export default class backend extends React.PureComponent {
 
 				{/* 内容  */}
 				<Content style={{ padding: '0 50px', margin: '0 auto', marginTop: 104, width: '60%' }}>
+					<Breadcrumb style={{ margin: '10px 0' }}>
+						<Dropdown overlay={menu}>
+							<Button>
+								排序规则 <Icon type="down" />
+							</Button>
+						</Dropdown>
+					</Breadcrumb>
 					<div style={{ background: '#fff', padding: 30, minHeight: 380 }}>
 						<ul style={{ padding: 0 }}><span style={{ fontWeight: 'bold' }}>已发布的内容</span><Button type="primary" onClick={this.showModal} shape="round" icon="plus" size="default" style={{ float: 'right' }}>添加</Button></ul>
 						<List
