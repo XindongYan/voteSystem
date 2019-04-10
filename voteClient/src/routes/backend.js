@@ -68,7 +68,7 @@ export default class backend extends React.PureComponent {
 
 	delete = async (e) => {
 		try {
-			let result = await remove(e);
+			let result = await remove(e, this.state.currentUser);
 			this.props.dispatch({
 				type: 'example/voteBackendContent',
 				payload: result
