@@ -36,7 +36,7 @@ app.use(require('koa-static')(path.join(__dirname, './public')));
 const userRouter = new Router();
 
 userRouter.all('/api/setNickName', index.setNickName);
-// userRouter.all('/api/createA', index.createAdmin);
+userRouter.all('/api/createA', index.createAdmin);
 userRouter.all('/api/authBackend', index.authBackend);
 userRouter.all('/api/upload', upload.single('image'), index.upload);
 
