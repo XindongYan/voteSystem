@@ -1,5 +1,12 @@
 import request from '../utils/request';
 
+export function verification() {
+  return request('/api/verification', {
+    method: 'GET',
+    headers: {}
+  })
+}
+
 export function setNickName(value) {
   return request('/api/setNickName', {
     method: 'POST',
@@ -35,6 +42,7 @@ export function getVoteContent(value) {
 
 // 点赞
 export function like(value) {
+  console.log(value)
   return request('/api/like', {
     method: 'POST',
     body: value,

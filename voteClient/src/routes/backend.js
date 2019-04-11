@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'dva';
 // import styles from './IndexPage.css';
-import { Layout, Menu, List, Avatar, Icon, Button, message, Dropdown, Breadcrumb } from 'antd';
+import { Layout, Menu, List, Avatar, Icon, Popconfirm, Button, message, Dropdown, Breadcrumb } from 'antd';
 import { routerRedux } from 'dva/router';
 import Modal from '../components/modal';
 import { remove } from '../services/example';
@@ -90,7 +90,7 @@ export default class backend extends React.PureComponent {
 		console.log('click', e);
 		this.props.dispatch({
 			type: 'example/fetchBackend',
-			payload: {type: e.key}
+			payload: { type: e.key }
 		});
 	}
 
@@ -167,8 +167,12 @@ export default class backend extends React.PureComponent {
 							renderItem={item => (
 								<List.Item
 									key={item.name}
-									actions={[<IconText type="like-o" text={item.like} />, <a onClick={e => this.edit(item)}>编辑</a>, <a onClick={e => this.delete(item)}>删除</a>]}
-									extra={<img width={272} alt="logo" src={`http://127.0.0.1:3000${item.imageUrl}`} />}
+									actions={[<IconText type="like-o" text={item.like} />, <a onClick={e => this.edit(item)}>编辑</a>,
+									<Popconfirm title="确定删除这条内容吗?" onConfirm={e => this.delete(item)} okText="Yes" cancelText="No">
+										<a>删除</a>
+									</Popconfirm>
+									]}
+									extra={<img width={272} alt="logo" src={`http://127.0.0.1:3000${item.imageUrl[0]}`} />}
 								>
 									<List.Item.Meta
 										avatar={<Avatar>管理员</Avatar>}

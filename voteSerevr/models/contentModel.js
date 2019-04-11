@@ -5,7 +5,7 @@ let contentSchema = new Schema({
     name: { type: String },
     school: { type: String },
     desc: { type: String },
-    imageUrl: { type: String },
+    imageUrl: { type: Array , default: []},
     like: { type: Number, default: 0 },
     comment: { type: Array, default: [] }
 }, {

@@ -2,8 +2,27 @@ const { userModel, adminModel } = require('../models/userModel');
 const { contentModel } = require('../models/contentModel');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const { verificationModel } = require('../models/verificationModel');
+const svgCaptcha = require('svg-captcha');
 
-module.exports = {
+const self = module.exports = {
+
+    randomWord: (randomFlag, min, max) => {
+        var str = "",
+            range = min,
+            arr = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+
+        // 随机产生
+        if (randomFlag) {
+            range = Math.round(Math.random() * (max - min)) + min;
+        }
+        for (var i = 0; i < range; i++) {
+            pos = Math.round(Math.random() * (arr.length - 1));
+            str += arr[pos];
+        }
+        return str;
+    },
+
     createAdmin: async (ctx, next) => {
         const username = "admin", password = "QAZWSX123";
         const hash = crypto.createHmac('sha256', 'slat-256').update(password).digest('hex');
@@ -23,6 +42,36 @@ module.exports = {
         };
 
         ctx.body = true;
+    },
+
+    verification: async (ctx, next) => {
+        // let rand = self.randomWord(false, 6);
+        let ip = ctx.request.ip;
+
+        const cap = svgCaptcha.create({
+            size: 4,
+            noise: 2,
+            height: 40,
+            fontSize: 36,
+            background: "#fff",
+            ignoreChars: '0oO1ilI',
+        });
+
+        let img = cap.data;
+
+        // ctx.cookies.set('cp', cap.text.toLocaleLowerCase());
+        let verification = new verificationModel({
+            verificationCode: cap.text.toLocaleLowerCase(),
+            ip: ip
+        });
+
+        try {
+            await verification.save()
+        } catch (error) {
+            throw error
+        };
+        ctx.type = 'image/svg+xml';
+        ctx.body =  `${img}`
     },
 
     authBackend: async (ctx, next) => {
@@ -142,11 +191,21 @@ module.exports = {
     },
 
     like: async (ctx, next) => {
-        let { id } = ctx.params;
+        let { id, code } = ctx.params;
         let likes
 
         try {
+            let use = await verificationModel.findOne({ verificationCode: code, ip: ctx.request.ip });
+            if (!use || use.use) {
+                throw '验证码错误'
+            }
+
             likes = await contentModel.findOneAndUpdate({ _id: id }, { $inc: { like: 1 } }, { new: true });
+            // try {
+            //     await verificationModel.findOneAndUpdate({ verificationCode: code }, { $set: { use: true } })
+            // } catch (error) {
+            //     likes = await contentModel.findOneAndUpdate({ _id: id }, { $inc: { like: -1 } }, { new: true });
+            // }
             if (!likes) {
                 console.log(likes)
                 throw '记录不存在'
@@ -173,7 +232,7 @@ module.exports = {
                 const fileName = fileMsg.filename;
                 content.imageUrl = `/images/${fileName}`;
 
-                let result = await contentModel.findByIdAndUpdate({ _id: id }, { $set: { imageUrl: `/images/${fileName}` } }, { new: true });
+                let result = await contentModel.findByIdAndUpdate({ _id: id }, { $push: { imageUrl: `/images/${fileName}` } }, { new: true });
                 // let contentCraete = new contentModel(content);
                 // contentCraete = await contentCraete.save();
                 if (!result) {

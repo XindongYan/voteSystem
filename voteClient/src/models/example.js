@@ -13,7 +13,8 @@ export default {
     visible: false,
     cache: {},  // 修改时的默认值
     currentUser: {},
-    edit: ''
+    edit: '',
+    images: []
   },
 
   subscriptions: {

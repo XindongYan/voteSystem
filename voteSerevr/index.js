@@ -7,6 +7,7 @@ const path = require('path');
 const Router = require('koa-router');
 const bodyParser = require('koa-bodyparser');
 const cors = require('koa2-cors');
+const cookieParse = require('cookie-parser');
 const rateLimit = require('koa2-ratelimit').RateLimit;
 
 const { upload } = require('./utils/upload');
@@ -19,7 +20,7 @@ const app = new koa();
 app.use(cors());
 // 限制一个ip十分钟间隔
 const postPi = rateLimit.middleware({
-    intercal: 10 * 60 * 1000,
+    intercal: 1 * 60 * 1000,
     max: 1
 })
 
@@ -31,6 +32,7 @@ app.use(bodyParser({
 }));
 
 app.use(params());
+// app.use(cookieParse());
 app.use(require('koa-static')(path.join(__dirname, './public')));
 
 const userRouter = new Router();
@@ -49,6 +51,9 @@ userRouter.all('/api/delete', index.delete);
 
 // 投票
 userRouter.all('/api/like', postPi, index.like);
+
+// 获取验证码
+userRouter.all('/api/verification', index.verification);
 
 app.use(userRouter.routes());
 

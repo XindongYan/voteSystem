@@ -8,14 +8,16 @@ const { TextArea } = Input;
 @connect(state => ({
 	cache: state.example.cache,
 	visible: state.example.visible,
-	edit: state.example.edit
+	edit: state.example.edit,
+	images: state.example.images
 }))
 
 export default class modalMusk extends React.PureComponent {
 
 	state = {
 		imageUrl: '',
-		image: []
+		image: [],
+		images: []
 	}
 
 	componentDidMount() {
@@ -26,15 +28,25 @@ export default class modalMusk extends React.PureComponent {
 		if (nextProps.cache._id !== this.props.cache._id) {
 			console.log('可以在这里写cache');
 			const { cache } = nextProps;
-			this.setState({
-				image: [{
-					uid: cache._id || '',
-					name: cache.school || '',
-					status: 'done',
-					url: 'http://127.0.0.1:3000' + cache.imageUrl || '',
-					thumbUrl: 'http://127.0.0.1:3000' + cache.imageUrl || ''
-				}]
-			})
+
+			if (cache && cache.imageUrl) {
+				let imageArray = []
+				let index = 0
+				for (const c of cache.imageUrl) {
+					imageArray.push({
+						'uid': index,
+						'name': c,
+						'status': 'done',
+						'url': 'http://127.0.0.1:3000' + c || '',
+						'thumbUrl': 'http://127.0.0.1:3000' + c || ''
+					})
+					index++;
+				}
+				this.setState({
+					image: imageArray
+				})
+			}
+
 		}
 	}
 
@@ -104,9 +116,9 @@ export default class modalMusk extends React.PureComponent {
 
 		const { getFieldDecorator } = this.props.form;
 		const { cache, visible, edit } = this.props;
-		const { image } = this.state;
+		const { image, imageUrl } = this.state;
 
-		console.log(edit === 'edit');
+		console.log(imageUrl);
 
 		// const image = [{
 		// 	uid: cache._id || '',
@@ -157,16 +169,24 @@ export default class modalMusk extends React.PureComponent {
 							rules: [{ required: false, message: '请上传文件!' }],
 						})(
 							edit !== 'edit' ?
-								<Upload
-									name="image" action="http://127.0.0.1:3000/api/upload" onChange={e => this.action(e)} listType="picture" multiple={true}>
-									<Button>
-										<Icon type="upload" /> 点击上传文件
-              		</Button>
-								</Upload>
+								imageUrl && imageUrl.response ?
+									<Upload
+										name="image" action="http://127.0.0.1:3000/api/update" data={{ id: imageUrl.response._id }} onChange={e => this.action(e)} listType="picture" multiple={true}>
+										<Button>
+											<Icon type="upload" /> 点击上传文件
+										</Button>
+									</Upload>
+									:
+									<Upload
+										name="image" action="http://127.0.0.1:3000/api/upload" onChange={e => this.action(e)} listType="picture" multiple={true}>
+										<Button>
+											<Icon type="upload" /> 点击上传文件
+									</Button>
+									</Upload>
 								:
 								<Upload
 									fileList={[...image]}
-									name="image" action="http://127.0.0.1:3000/api/update" data={{ id: cache._id }} onChange={e => this.action(e)} listType="picture" multiple={true}>
+									name="image" action="http://127.0.0.1:3000/api/update" data={{ id: cache._id, image }} onChange={e => this.action(e)} listType="picture" multiple={true}>
 									<Button>
 										<Icon type="upload" /> 点击上传文件
               		</Button>
@@ -175,9 +195,17 @@ export default class modalMusk extends React.PureComponent {
 					</Form.Item>
 
 					<Form.Item>
-						<Button type="primary" htmlType="submit" style={{ fontFamily: '微软雅黑' }} className="login-form-button">
-							立即创建
-            	</Button>
+						{
+							edit !== 'edit' ?
+								<Button type="primary" htmlType="submit" style={{ fontFamily: '微软雅黑' }} className="login-form-button">
+									添加投票内容
+            		</Button>
+								:
+								<Button type="primary" htmlType="submit" style={{ fontFamily: '微软雅黑' }} className="login-form-button">
+									保存
+            		</Button>
+						}
+
 					</Form.Item>
 				</Form>
 			</Modal>
